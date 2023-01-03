@@ -1,0 +1,12 @@
+<html>
+    <head>
+        <title>Finch Web App</title>
+        <link rel = "stylesheet" href = "{{url_for('static', filename ='css/main.css')}}">
+        {% block head %}{% endblock %}
+    </head>
+    <body>
+        <h1>Hey Tyler! </h1>
+        <p>The HTTP Flask Server is working on port 5000</p>
+        {% block body %}{% endblock %}
+    </body>
+</html>

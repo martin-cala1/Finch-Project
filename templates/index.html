@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title> Finch Web App</title>
+
+{% endblock %}
+
+{% block body %}
+<div class="content">
+    <h1 style = "text-align: center">
+        Get Employee Data 
+    </h1>
+    <p style="text-align: center">Fill in provider below to get employee data</p>
+
+    {% if tasks|length <1  %}
+    <h4>There are no tasks</h4>
+    {% else %}
+
+    <table>
+        <tr>
+            <th>
+                Task
+            </th>
+            <th>Added
+            </th>
+            <th>Actions <!--th is Table Header while td is Table Data -->
+            </th>
+        </tr>
+
+        {% for task in tasks %}
+
+        <tr>
+            <td>{{ task.content}}</td>
+            <td>{{task.date_created.date()}}</td>
+            <td>
+                <a href="/delete/{{task.id}}">Delete</a>
+                <br>
+                <a href="/update/{{task.id}}">Update</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+    <div class ="form">
+        <form actions = "/" method = "POST">
+            <input type="text" name="content" id="content">
+            <input type="submit" value = "Get Employee Data ya bish">
+
+        </form>
+    </div>
+
+</div>
+{% endblock %}
