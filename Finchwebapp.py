@@ -1,6 +1,4 @@
 from flask import Flask, render_template, url_for, request, redirect
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
 import json
 import requests
 
@@ -32,13 +30,10 @@ def index():
 
 		else:
 			return "Provider not found"
-
-
-	else:
-		
+	else:		
 		return render_template('index.html')
 
-
+# helper function to display employees in given provider
 def get_employees(provider):
 	url = "https://finch-sandbox-se-interview.vercel.app/api/sandbox/create"
 
@@ -46,6 +41,7 @@ def get_employees(provider):
 	header = {'Content-Type': 'application/json'}
 	global access_token
 	global directory_endpoint
+	global request_headers
 
 	#first must request sandbox access token
 	response = requests.post(url, headers=header, json=payload)
@@ -53,31 +49,23 @@ def get_employees(provider):
 	#convert response to json dictionary object
 	json_dict = response.json()
 	
+	#get access token
 	access_token = response.json().get('access_token')
 
+	#update request headers
 	request_headers={'Authorization': 'Bearer '+ access_token, 'Content-Type': 'application/json'}
-	'''
-	directory_endpoint = "https://finch-sandbox-se-interview.vercel.app/api/employer/directory"
-	individual_endpoint = "https://finch-sandbox-se-interview.vercel.app/api/employer/individual"
-	employment_endpoint = "https://finch-sandbox-se-interview.vercel.app/api/employer/employment"
-	'''
+	
+	#get full directory from provider
 	request = requests.get(directory_endpoint, headers = request_headers)
 
-
-
+	#get array of individuals
 	employees = request.json().get('individuals')
-	print(type(employees))
-	print(employees)
-
-	#employees = request.json()
-
-
 	
-	return render_template('update.html', list = employees)
+	return render_template('directory.html', list = employees)
 
 	
 
-
+# route for individual employee data
 @app.route('/individual/<emp_id>', methods =  ['POST', 'GET'])
 def get_employee_data(emp_id):
 
@@ -96,36 +84,29 @@ def get_employee_data(emp_id):
 			return "Provider not found"
 
 
-	#See below for employee data'
+	#get individual employee data
 	else:
 		request_headers={'Authorization': 'Bearer '+ access_token, 'Content-Type': 'application/json'}
-
 		ind_json = {'requests': [{'individual_id': emp_id}]}
+
 		individual_response = requests.post(individual_endpoint, headers = request_headers, json = ind_json)
 
 		ind_data = individual_response.json().get('responses')[0].get('body')
-
-		#print(type((ind_data)))
-
-		#print((ind_data))
 				
 		return render_template('individual.html', data = ind_data)
 
+#route for employment data for an individual employee
 @app.route('/employment/<emp_id>', methods =  ['POST', 'GET'])
 def get_employment_data(emp_id):
 
 	global provider
 	global employment_endpoint
 	global access_token
-	print(access_token)
+	global request_headers
 	if request.method == "POST":
-		
 		provider = request.form['content']
-	
 		if provider in providers:
-
 			return get_employees(provider)
-
 		else:
 			return "Provider not found"
 
@@ -138,41 +119,33 @@ def get_employment_data(emp_id):
 		individual_response = requests.post(employment_endpoint, headers = request_headers, json = ind_json)
 
 		ind_data = individual_response.json().get('responses')[0].get('body')
-
-		print(type((ind_data)))
-
-		print((ind_data))
 				
 		return render_template('employment.html', data = ind_data)
 
 
+#helper function to get managers from directory displayed in directory.html
 @app.context_processor
 def utility_processor():
 	def get_manager(manager_id):
 		if manager_id is None:
 			return 'None'
 		else:
-			print(manager_id)
 			url = "https://finch-sandbox-se-interview.vercel.app/api/sandbox/create"
 			global provider
 			global request_headers
 			global access_token
 			global individual_endpoint
 			manager_id = manager_id.get('id')
-
 		
 			request_headers={'Authorization': 'Bearer '+ access_token, 'Content-Type': 'application/json'}
-
 			ind_json = {'requests': [{'individual_id': manager_id}]}
+
 			individual_response = requests.post(individual_endpoint, headers = request_headers, json = ind_json)
 
-
-			print(individual_response.status_code)
-			
 			ind_data = individual_response.json().get('responses')[0].get('body')
-			#print(ind_data)
+
 			name = ind_data.get('first_name') + ' '+ ind_data.get('last_name')
-			print(name)
+
 			return name
 	return dict(get_manager=get_manager)
 		

@@ -12,7 +12,6 @@
     </h1>
     <p>Fill in provider below to get employee data</p>
 
-    
     <div class ="form">
         <form actions = "/" method = "POST">
             <input type="text" name="content" id="content" value ="{{emp}}" >
@@ -29,30 +28,19 @@
             <th>  </th>
         </tr>
 
-
-
     {% for emp in list %}
-
     <tr>
             <th>{{ emp.get('first_name') }} {{emp.get('last_name')}} </th>
-            <th> 
-
-                {{get_manager(emp.get('manager'))}}
-                
-            </th>
+            <th> {{get_manager(emp.get('manager'))}}</th>
             <th>{{ emp.get('is_active') }} </th>
 
-
             <th>
-                <a href="/individual/{{ emp.get('id')}}">Individual</a>
+                <a href="/individual/{{ emp.get('id') }}">Individual</a>
                 <br>
-                <a href="/employment/{{ emp.get('id')}}">Employment</a>
+                <a href="/employment/{{ emp.get('id') }}">Employment</a>
                 </th>
     </tr>
-    
     {% endfor %}
     </table>
-
-
 </div>
 {% endblock %}
